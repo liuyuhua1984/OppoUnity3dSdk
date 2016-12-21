@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
-using LitJson;
+
 public class SDKManager
 {
 
@@ -23,11 +22,17 @@ public class SDKManager
     private bool isSdk = true;
     public SDKManager()
     {
+        //var t1 = "{\"sss\":\"dd\",\"uId\":999999232}";
+        //var dd1 = JsonMapper.ToObject(t1);
+        //Debug.LogError(dd1.GetLong("uId"));
+
         GameObject sdkObj = new GameObject("SDKHandler");
         SDKHandler sdkhandler = DllManager.instance.AddCompotent<SDKHandler>(sdkObj, "SDKHandler");
         Debug.LogError("sdkHandler == NULL   " + (sdkObj == null));
         
         GameObject.DontDestroyOnLoad(sdkObj);
+        GameObject obj1 = new GameObject("MiSdk");
+        GameObject.DontDestroyOnLoad(obj1);
 
 
 #if R2
@@ -40,12 +45,27 @@ public class SDKManager
 #elif oppo
         Debug.LogError("sdkObj == NULL   " + (sdkObj == null));
 
-        mGameSdk = DllManager.instance.AddCompotent<OppoSdk>(sdkObj, "OppoSdk");
+        mGameSdk = DllManager.instance.AddCompotent<OppoSdk>(obj1, "OppoSdk");
         Debug.LogError("mGameSdk == NULL   " + (mGameSdk == null));
 
         //mGameSdk = OppoSdk.getInstance();
+#elif mi
+        Debug.LogError("sdkObj == NULL   " + (sdkObj == null));
+        
+        mGameSdk = DllManager.instance.AddCompotent<MiSdk>(obj1, "MiSdk");
+        Debug.LogError("mGameSdk == NULL   " + (mGameSdk == null));
+
+#elif uc
+        Debug.LogError("sdkObj == NULL   " + (sdkObj == null));
+        
+        mGameSdk = DllManager.instance.AddCompotent<UcSdk>(obj1, "UcSdk");
+        Debug.LogError("mGameSdk == NULL   " + (mGameSdk == null));
 #else
+
+
         isSdk = false;
+          mGameSdk = DllManager.instance.AddCompotent<NoSdk>(obj1, "NoSdk");
+        //  mGameSdk = DllManager.instance.AddCompotent<MiSdk>(sdkObj, "MiSdk");
 #endif
 
     }
@@ -61,6 +81,8 @@ public class SDKManager
 		return "qhjgoogle";
 #elif oppo
 		return "oppo";
+#elif mi
+		return "mi";
 #else
         return "qhsk";
 #endif
@@ -93,6 +115,10 @@ public class SDKManager
 
     public void Login()
     {
+#if UNITY_EDITOR
+        SDKHandler.instance.LoginCallback("NoSdk" + "_" + SystemInfo.deviceUniqueIdentifier);
+        return;
+#endif
         /***
 #if R2
             R2SDK.LoginSDK();
@@ -146,6 +172,7 @@ public class SDKManager
                       FacebookSDK.CallFBLogout();
         #endif
         **/
+        Debug.LogError("game Exit ...");
         mGameSdk.exitSdk();
     }
 

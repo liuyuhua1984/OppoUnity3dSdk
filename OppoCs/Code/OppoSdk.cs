@@ -22,7 +22,7 @@ public class OppoSdk : MonoBehaviour ,ISdk {
     void Awake()
     {
         instance = this;
-        GAME_OBJECT = gameObject.name;
+        GAME_OBJECT = GetType().Name;
 
 
     }
@@ -56,7 +56,8 @@ public class OppoSdk : MonoBehaviour ,ISdk {
 
         // callSdkApi("login", GAME_OBJECT);
 
-        SDKHandler.instance.LoginCallback(SDKManager.Instance.GetPlatform() + "_"+ Session.GetInstance().myPlayer.uid);
+        SDKHandler.instance.LoginCallback(SDKManager.Instance.GetPlatform() + "_"+
+            SystemInfo.deviceUniqueIdentifier);
     }
 
     /// <summary>
@@ -69,15 +70,20 @@ public class OppoSdk : MonoBehaviour ,ISdk {
     /// <param name="callback"></param>(服务端回调地址)
     public void pay(BuyCoinData bcData)
     {
+        //Debug.LogError("oppo充10001");
 
-        int amount = (int)bcData.currency*100;//分
-       // int amount = 1;
-        string userId = ""+Session.GetInstance().GetURLRequestManager().GetMyUid();
-        string callback = "http://218.244.129.189/qwsk1/index.php?m=opposdk&a=oppo_pay";
-        callSdkApi("pay",GAME_OBJECT, amount,"充值","oppo描述", userId, callback);
+        int amount = (int)bcData.currency * 100;//分
+        //amount = amount/100;
+        //string userId = Session.GetInstance().myPlayer.uid;
+        string userId = ObjUtil.GetUrlRequestManager().userId.ToString();
+        //string callback = "http://218.244.129.189/qwsk1/index.php?m=opposdk&a=oppo_pay";
+        string callback = "http://218.244.129.189/qwsk1/index.php?m=sdk&a=oppo_pay";
+
+        callSdkApi("pay", GAME_OBJECT, amount, "充值", "描述", userId, callback);
+        //Debug.LogError("oppo充10002");
+
     }
-
-
+   
     /// <summary>
     /// onResume & onPause（控制浮标的显示和隐藏，需成对调用）
     /// </summary>
@@ -94,7 +100,16 @@ public class OppoSdk : MonoBehaviour ,ISdk {
 
     public void exitSdk()
     {
-        callSdkApi("exitSdk", GAME_OBJECT);
+        try
+        {
+            callSdkApi("exitSdk", GAME_OBJECT);
+
+        }
+        catch (Exception)
+        {
+            Application.Quit();
+            throw;
+        }
         
     }
     /// <summary>
@@ -149,9 +164,12 @@ public class OppoSdk : MonoBehaviour ,ISdk {
     /// <param name="msg"></param>
     public void OnPaySuccess(string msg)
     {
-        log("充值成功");
+        var t = ObjUtil.GetUrlRequestManager();
+        t.VIPInfo(null);
+        t.OnSynPlyerD();
+        //var t = "";
+        print("充值成功");
     }
-
     /// <summary>
     /// 支付失败
     /// </summary>
@@ -177,7 +195,7 @@ public class OppoSdk : MonoBehaviour ,ISdk {
         Application.Quit();
     }
 
-    public void getToken(String jsonString)
+    public void getToken(string jsonString)
     {
         log("获取token:"+ jsonString);
         JsonData json = JsonMapper.ToObject(jsonString);

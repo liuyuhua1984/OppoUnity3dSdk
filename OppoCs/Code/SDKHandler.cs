@@ -4,12 +4,18 @@ using System.Collections;
 public class SDKHandler : MonoBehaviour
 {
     public static SDKHandler instance = null;
+    public static string GAME_OBJECT = "SDKHandler";
+    //public static string GAME_OBJECT = "MainCamera";
+
     void Awake()
     {
         instance = this;
         
     }
-
+    public void OnCallHello()
+    {
+        AlertPanel.Show("测试回调！2");
+    }
     public void InitCallback(string result)
     {
         Debug.LogError("InitCallback  CALL   " + result);
@@ -49,7 +55,7 @@ public class SDKHandler : MonoBehaviour
 #endif
         }
     }
-
+    
     public void PayCallback(string context)
     {
         Debug.LogError("PayCallback " + context);
@@ -62,7 +68,6 @@ public class SDKHandler : MonoBehaviour
 #else
 
 #endif
-
 		Session.GetInstance().GetURLRequestManager().VIPInfo(null);
     }
 
